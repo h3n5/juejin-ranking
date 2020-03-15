@@ -1,10 +1,14 @@
 const mongoose = require('mongoose')
 
-const DB_URL = 'mongodb://localhost:27017/juejin'
+const DB_URL = 'mongodb://melt:351258@m3lt.cn:27017/juejin'
 
 mongoose.connect(DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
+  // auth: {
+  //   user: 'melt',
+  //   pass: '351258'
+  // }
 }) /** * 连接成功 */
 
 mongoose.connection.on('connected', function() {
