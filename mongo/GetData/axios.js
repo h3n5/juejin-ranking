@@ -1,13 +1,26 @@
 const axios = require('axios')
 const requestHeaders = {
-  'X-Juejin-Src': 'web',
-  'X-Juejin-Token':
-    'eyJhY2Nlc3NfdG9rZW4iOiJ3NlpSMDJTb1VxRFo0RThiIiwicmVmcmVzaF90b2tlbiI6IkdZTWxTc2lQTkVtSzFvNmIiLCJ0b2tlbl90eXBlIjoibWFjIiwiZXhwaXJlX2luIjoyNTkyMDAwfQ=='
+  'User-Agent':
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36'
 }
-const request = axios.create({
-  headers: requestHeaders
-})
 
+const request = axios.create({
+  headers: requestHeaders,
+  timeout: 3000
+})
+// 添加请求拦截器
+request.interceptors.request.use(
+  function(config) {
+    // 在发送请求之前做些什么
+    return config
+  },
+  function(error) {
+    // 对请求错误做些什么
+    return Promise.reject(error)
+  }
+)
+
+// 添加响应拦截
 request.interceptors.response.use(
   function(response) {
     return response.data

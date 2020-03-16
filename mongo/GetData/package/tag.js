@@ -1,11 +1,16 @@
 const request = require('../axios')
-const mongoose = require('mongoose')
 const { tagListUrl } = require('../url')
 const Tag = require('../../Model/tag')
 async function getTags() {
   const {
     d: { tags }
-  } = await request(tagListUrl)
+  } = await request.get(tagListUrl, {
+    headers: {
+      'X-Juejin-Src': 'web',
+      'X-Juejin-Token':
+        'eyJhY2Nlc3NfdG9rZW4iOiJ3NlpSMDJTb1VxRFo0RThiIiwicmVmcmVzaF90b2tlbiI6IkdZTWxTc2lQTkVtSzFvNmIiLCJ0b2tlbl90eXBlIjoibWFjIiwiZXhwaXJlX2luIjoyNTkyMDAwfQ=='
+    }
+  })
   console.log(`tags count => ${tags.length}`)
   const saveData = tags.map((v) => ({
     updateOne: {
