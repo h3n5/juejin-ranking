@@ -1,7 +1,7 @@
 const mongoose = require('../server')
-
 const Schema = mongoose.Schema
-
+const ObjectId = Schema.Types.ObjectId
+const Mixed = Schema.Types.Mixed
 const articleSchema = new Schema(
   {
     collectionCount: Number,
@@ -26,7 +26,7 @@ const articleSchema = new Schema(
     hot: Boolean,
     autoPass: Boolean,
     originalUrl: String,
-    buildTime: Number,
+    buildTime: Mixed,
     createdAt: String,
     user: {
       collectedEntriesCount: Number,

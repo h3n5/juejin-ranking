@@ -1,5 +1,4 @@
 const mongoose = require('../server')
-
 const Schema = mongoose.Schema
 
 const tagSchema = new Schema({

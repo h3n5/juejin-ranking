@@ -22,29 +22,21 @@ async function getArticles(tags = []) {
       }
     }))
     Article.bulkWrite(saveData)
-      .then((res) => {
-        // console.log('res', res)
+      .then(() => {
         console.log('保存成功')
       })
       .catch((e) => console.log('保存失败', e))
   }
-  promiseLimit(Task, 3, request, cb).then((arts) => {
-    // const saveData = arts.map((v) => ({
-    //   updateOne: {
-    //     filter: { _id: v.objectId },
-    //     update: { $set: { ...v, _id: v.objectId } },
-    //     upsert: true
-    //   }
-    // }))
-    // Article.bulkWrite(saveData)
-    //   .then((res) => {
-    //     console.log('res', res)
-    //   })
-    //   .catch((e) => console.log('err2', e))
+  promiseLimit(Task, 9, request, cb).then((arts) => {
+    cb(arts)
+    console.log('End')
   })
 }
 Tag.find().then((res) => {
-  console.log(res.reduce((p, c) => p + c.entryCount, 0))
+  // console.log(res.reduce((p, c) => p + c.entryCount, 0))
+  Article.find().then(res => {
+    console.log(res.length)
+  })
   // getArticles(res)
 })
 module.exports = getArticles
