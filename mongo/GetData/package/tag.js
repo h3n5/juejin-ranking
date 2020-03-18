@@ -24,6 +24,6 @@ async function getTags() {
       console.log('res', res)
     })
     .catch((e) => console.log('err2', e))
+  return tags
 }
-getTags()
 module.exports = getTags

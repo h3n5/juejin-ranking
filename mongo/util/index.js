@@ -1,3 +1,5 @@
+const eventBus = require('./eventBus')
+
 function promiseLimit(arr = [], num = 5, request, cb) {
   const allLength = arr.length
   const start = Date.now()
@@ -21,6 +23,10 @@ function promiseLimit(arr = [], num = 5, request, cb) {
             ((allLength - arr.length) / allLength) *
             100
           ).toFixed(2)}%`
+        )
+        eventBus.emit(
+          'articles-progress',
+          (((allLength - arr.length) / allLength) * 100).toFixed(2)
         )
       } catch (error) {
         console.log(error)

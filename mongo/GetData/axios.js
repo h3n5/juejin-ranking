@@ -6,7 +6,7 @@ const requestHeaders = {
 
 const request = axios.create({
   headers: requestHeaders,
-  timeout: 3000
+  timeout: 4000
 })
 // 添加请求拦截器
 request.interceptors.request.use(
