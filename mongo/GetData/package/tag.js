@@ -20,8 +20,8 @@ async function getTags() {
     }
   }))
   Tag.bulkWrite(saveData)
-    .then((res) => {
-      console.log('res', res)
+    .then(() => {
+      console.log('标签查找Over')
     })
     .catch((e) => console.log('err2', e))
   return tags

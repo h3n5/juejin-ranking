@@ -8,12 +8,19 @@ function promiseLimit(arr = [], num = 5, request, cb) {
   return new Promise(async (resolve) => {
     let tmpArr = []
     while (arr.length > 0) {
-      let tmp = arr.splice(0, num).map((v) => request(v))
       try {
+        let tmp = arr.splice(0, num).map((v) =>
+          request(v).catch((e) => ({
+            err: e
+          }))
+        )
         let data = await Promise.all(tmp)
-        data.forEach((v) => {
-          tmpArr = tmpArr.concat(v.d.entrylist)
-        })
+        console.log(`请求失败共${data.filter((v) => v.err).length}个`)
+        data
+          .filter((v) => !v.err)
+          .forEach((v) => {
+            tmpArr = tmpArr.concat(v.d.entrylist)
+          })
         if (cb && tmpArr.length >= limit) {
           cb(tmpArr)
           tmpArr = []
@@ -29,7 +36,7 @@ function promiseLimit(arr = [], num = 5, request, cb) {
           (((allLength - arr.length) / allLength) * 100).toFixed(2)
         )
       } catch (error) {
-        console.log(error)
+        console.log('timeout')
       }
     }
     const end = Date.now()

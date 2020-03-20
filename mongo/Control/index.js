@@ -2,7 +2,7 @@ const Tag = require('../Model/tag')
 const Article = require('../Model/article')
 const task = require('../GetData/index')
 const eventBus = require('../util/eventBus')
-const taskLoading = true
+let taskFlag = true
 let progress = 0
 eventBus.on('articles-progress', (e) => (progress = e))
 async function findTag(req, res) {
@@ -91,18 +91,19 @@ async function findArticle(req, res) {
 async function refreshData(req, res) {
   let { query } = req
   let { code } = query
-  if (code === 'melt1993' && taskLoading) {
-    task().then(() => {
-      taskLoading = true
-    })
-    taskLoading = false
-    res.send({ success: true })
-  } else {
-    if (taskLoading) {
-      res.send({ success: false })
+  if (code === 'melt1993') {
+    if (taskFlag) {
+      taskFlag = false
+      task().then(() => {
+        taskFlag = true
+      })
+      res.send({ success: true })
     } else {
-      res.send({ success: false, msg: progress })
+      res.send({ success: true, msg: progress })
     }
+  } else {
+    res.send({ success: false })
   }
 }
+
 module.exports = { findTag, findArticle, refreshData }

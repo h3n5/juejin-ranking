@@ -5,5 +5,4 @@ async function task() {
   let res = await tag()
   await article(res)
 }
-
 module.exports = task
