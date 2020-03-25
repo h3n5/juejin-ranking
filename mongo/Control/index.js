@@ -30,14 +30,15 @@ async function findTag(req, res) {
   }
 }
 async function findArticle(req, res) {
-  let { query } = req
+  let { body } = req
   let {
     pageIndex = 0,
     pageSize = 20,
     title = '',
     type = '',
-    sort = 'desc'
-  } = query
+    sort = 'desc',
+    tags = []
+  } = body
   let conditions = {}
   let sortConditon = {}
   switch (type) {
@@ -55,7 +56,7 @@ async function findArticle(req, res) {
       break
     default:
       sortConditon = {
-        hotIndex: sort === 'desc' ? -1 : 1
+        rankIndex: -1
       }
   }
   if (title) {
@@ -73,6 +74,18 @@ async function findArticle(req, res) {
         }
       }
     ]
+  }
+  if (tags.length) {
+    if (!conditions.$or) conditions.$or = []
+    conditions.$or = conditions.$or.concat(
+      tags.map((v) => ({
+        tags: {
+          $elemMatch: {
+            title: v.name
+          }
+        }
+      }))
+    )
   }
   try {
     let data = await Promise.all([

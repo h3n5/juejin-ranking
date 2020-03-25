@@ -1,8 +1,8 @@
 module.exports = {
   mode: 'universal',
   server: {
-    port: 3333, // default: 3000
-    host: '0.0.0.0' // default: localhost,
+    port: 3333 // default: 3000
+    // host: '0.0.0.0' // default: localhost,
   },
   /*
    ** Headers of the page
@@ -31,7 +31,10 @@ module.exports = {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: ['@/plugins/iview'],
+  plugins: [
+    '@/plugins/iview',
+    { src: '~plugins/persistedstate.js', ssr: false }
+  ],
   /*
    ** Nuxt.js dev-modules
    */

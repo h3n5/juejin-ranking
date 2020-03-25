@@ -14,6 +14,9 @@
               <div class="meta-subscribe">{{ item.subscribersCount }} 关注</div>
               <div class="meta-article">{{ item.entryCount }} 文章</div>
             </div>
+            <div class="flex-center">
+              <Button size="small" @click="goAdd(item)">添加至首页</Button>
+            </div>
           </div>
         </Card>
       </li>
@@ -49,6 +52,7 @@ export default {
     }
   },
   methods: {
+    goAdd(item) {},
     handleReachBottom() {
       return new Promise((resolve) => {
         this.condition.pageIndex++
@@ -72,6 +76,12 @@ export default {
   padding: 20px 0;
   width: 1000px;
   margin: auto;
+  .flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+  }
   .tag-item {
     list-style-type: none;
     flex-basis: 25%;

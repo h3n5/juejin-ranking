@@ -7,8 +7,8 @@
       <div class="info-list">
         {{ article.user.username }}
       </div>
-      <div class="info-list">
-        {{ article.tags[0].title }}
+      <div class="info-list" v-for="(item, index) in article.tags" :key="index">
+        {{ item.title }}
       </div>
     </div>
     <div class="title-row flex-row">
@@ -30,7 +30,7 @@ export default {
   props: {
     article: {
       type: Object,
-      default: () => ({})
+      default: () => ({ tags: [] })
     }
   },
   data() {

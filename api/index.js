@@ -9,7 +9,7 @@ export const getTag = (params) => {
 export const getArticle = (params) => {
   return axios.request({
     url: '/getArticle',
-    method: 'get',
-    params
+    method: 'post',
+    data: params
   })
 }

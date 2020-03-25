@@ -5,7 +5,7 @@ const app = express()
 const router = require('../mongo')
 const config = require('../nuxt.config.js')
 config.dev = process.env.NODE_ENV !== 'production'
-
+const bodyParser = require('body-parser')
 async function start() {
   // Init Nuxt.js
   const nuxt = new Nuxt(config)
@@ -18,7 +18,8 @@ async function start() {
     const builder = new Builder(nuxt)
     await builder.build()
   }
-
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: false }));
   app.use('/api', router)
   // Give nuxt middleware to express
   app.use(nuxt.render)

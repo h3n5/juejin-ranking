@@ -1,169 +1,328 @@
 <template>
-  <div class="container">
-    <h1 class="title">
-      <logo />
-      <span style="vertical-align: super;">juejin</span>
-    </h1>
-    <h2 class="subtitle">
+  <div ref="scroll" class="wrap-scroll" @wheel="onWheel">
+    <div class="article-block">
+      <div class="article-nav">
+        <Button
+          :type="condition.type ? 'text' : 'primary'"
+          class="default-btn"
+          @click="goDefault"
+          >默认</Button
+        >
+        <selectupdown
+          v-for="item in select"
+          :key="item.type"
+          :item="item"
+          @changeSort="
+            ;(item.sort = item.sort === 'desc' ? 'asc' : 'desc'),
+              handleReachBottom(false)
+          "
+          @click="goSelect(item)"
+        />
+      </div>
+      <div class="article-list">
+        <div style="margin-bottom:10px">
+          <Tag
+            v-for="(item, index) in checks"
+            :color="item.color"
+            :key="index"
+            closable
+            @on-close="checks.splice(index, 1)"
+            >{{ item.name }}</Tag
+          >
+        </div>
+        <articlecom
+          v-for="(item, index) in list"
+          :key="index"
+          :article="item"
+        />
+      </div>
+      <div v-if="isDone" class="isDone">
+        已经到底了
+      </div>
+      <Spin v-if="showSpin" class="spin">加载中...</Spin>
+      <BackTop></BackTop>
+    </div>
+    <div class="tag-block">
       <Input
-        v-model="search"
-        search
+        v-model="condition.title"
+        placeholder="enter somethings……"
+        suffix="ios-search"
         enter-button
-        size="large"
-        @click.native="goArticle"
+        @click.native="handleReachBottom(false)"
+        @on-enter="handleReachBottom(false)"
       />
-    </h2>
-    <div class="view-nav">
-      <ul class="nav-list left">
-        <li class="nav-item active">
-          <div class="category-popover-box">
-            <a>推荐</a>
-          </div>
-        </li>
-        <li class="nav-item">
-          <div class="category-popover-box">
-            <a>后端</a>
-          </div>
-        </li>
-        <li class="nav-item">
-          <div class="category-popover-box">
-            <a>前端</a>
-          </div>
-        </li>
-        <li class="nav-item">
-          <div class="category-popover-box">
-            <a>Android</a>
-          </div>
-        </li>
-        <li class="nav-item">
-          <div class="category-popover-box">
-            <a>iOS</a>
-          </div>
-        </li>
-        <li class="nav-item">
-          <div class="category-popover-box">
-            <a>人工智能</a>
-          </div>
-        </li>
-        <li class="nav-item right">
-          <nuxt-link to="/tags">标签管理</nuxt-link>
-        </li>
-      </ul>
+
+      <div class="tag-list">
+        <Tag color="error" @click.native="hot">热门</Tag>
+        <Tag
+          v-for="(item, index) in localTags"
+          :color="item.color"
+          :key="index"
+          @click.native="addCheck(item)"
+          >{{ item.title }}</Tag
+        >
+      </div>
+      <div class="tag-list">
+        <Button icon="ios-add" type="dashed" size="small" to="/tags"
+          >标签管理</Button
+        >
+        <Button type="primary" size="small" to="/tags">更新数据</Button>
+      </div>
+      <Card class="comment-card" dis-hover>
+        <p slot="title">
+          推荐文章
+        </p>
+        <List>
+          <ListItem>
+            <ListItemMeta
+              avatar="https://dev-file.iviewui.com/userinfoPDvn9gKWYihR24SpgC319vXY8qniCqj4/avatar"
+              title="This is title"
+              description="This is description, this is description."
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemMeta
+              avatar="https://dev-file.iviewui.com/userinfoPDvn9gKWYihR24SpgC319vXY8qniCqj4/avatar"
+              title="This is title"
+              description="This is description, this is description."
+            />
+          </ListItem>
+        </List>
+      </Card>
     </div>
   </div>
 </template>
-
 <script>
-import Logo from '~/components/Logo.vue'
+import throttle from 'lodash.throttle'
+import { getArticle } from '@/api'
+import articlecom from '@/components/article'
+import selectupdown from '@/components/selectupdown'
+import { mapState } from 'vuex'
 export default {
+  name: 'Articles',
   components: {
-    Logo
+    articlecom,
+    selectupdown
+  },
+  async asyncData() {
+    const { success, data, count } = await getArticle({ sort: false })
+    if (success) {
+      return {
+        list: data,
+        count
+      }
+    } else {
+      console.log('接口获取失败')
+    }
+  },
+  computed: {
+    ...mapState('local', ['localTags'])
   },
   data() {
     return {
-      search: ''
+      checks: [],
+      items: [
+        { name: '后端', color: 'magenta' },
+        { name: '前端', color: 'success' },
+        { name: 'Android', color: 'gold' },
+        { name: 'iOS', color: '#FFA2D3' },
+        { name: '人工智能', color: 'primary' }
+      ],
+      isDone: false,
+      condition: {
+        title: '',
+        type: '',
+        sort: 'desc',
+        pageIndex: 0,
+        pageSize: 20,
+        tags: []
+      },
+      list: [],
+      count: 0,
+      showSpin: false,
+      select: [
+        {
+          type: 'thumbUpCount',
+          name: '点赞数',
+          sort: 'desc',
+          selected: false
+        },
+        {
+          type: 'commentCount',
+          name: '评论数',
+          sort: 'desc',
+          selected: false
+        },
+        {
+          type: 'viewsCount',
+          name: '阅读数',
+          sort: 'desc',
+          selected: false
+        },
+        {
+          type: 'createTime',
+          name: '创建时间',
+          sort: 'desc',
+          selected: false
+        }
+      ]
+    }
+  },
+  watch: {
+    checks(v) {
+      if (v.length) {
+        this.condition.tags = v
+      } else {
+        this.condition.tags = []
+      }
+      this.handleReachBottom(false)
     }
   },
   methods: {
-    goArticle() {
-      this.$router.push('/articles?title=' + this.search)
-    }
+    addCheck(item) {
+      if (!this.checks.map((v) => v.name).includes(item.name)) {
+        this.checks.push(item)
+      }
+    },
+    goDefault() {
+      this.condition.type = ''
+      this.select.forEach((v) => (v.selected = false))
+      this.handleReachBottom(false)
+    },
+    goSelect(item) {
+      this.select.forEach((element) => {
+        element.selected = false
+      })
+      item.selected = true
+      this.condition.type = item.type
+      this.handleReachBottom(false)
+    },
+    hot() {
+      this.select.forEach((element) => {
+        element.selected = false
+      })
+
+      this.condition.sort = this.condition.sort === 'desc' ? 'asc' : 'desc'
+      this.condition.type = ''
+      this.handleReachBottom(false)
+    },
+    handleReachBottom(add = true) {
+      return new Promise((resolve) => {
+        if (!add) {
+          this.isDone = false
+          this.condition.pageIndex = 0
+        } else {
+          this.condition.pageIndex++
+        }
+        this.showSpin = true
+        const data = {
+          ...this.condition,
+          ...this.select.find((v) => v.selected)
+        }
+        if (this.isDone) {
+          this.showSpin = false
+          return this.$Message.warning('已经到底了')
+        }
+        getArticle(data).then((res) => {
+          if (res.success) {
+            if (add) {
+              this.list = this.list.concat(res.data)
+            } else {
+              this.list = res.data
+            }
+            if (this.list.length >= res.count) {
+              this.isDone = true
+            }
+          } else {
+            this.$Message.error(res.msg)
+          }
+          this.showSpin = false
+          resolve()
+        })
+      })
+    },
+    onWheel: throttle(
+      function(e) {
+        const direction = event.wheelDelta
+          ? event.wheelDelta
+          : -(event.detail || event.deltaY)
+        const el = document.documentElement
+        const scrollTop = el.scrollTop
+        const scrollHeight = el.scrollHeight
+        const clientHeight = el.clientHeight
+        const rest = scrollHeight - clientHeight
+        const condition = rest - scrollTop < rest / 3
+        if (direction < 0 && rest > 0) {
+          if (condition && !this.showSpin) {
+            this.handleReachBottom()
+          }
+        }
+      },
+      2000,
+      { trailing: false }
+    )
   }
 }
 </script>
-
 <style lang="less" scope>
-html,
-body,
-#__nuxt,
-#__layout,
-.ivu-layout {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+.spin {
+  height: 30px;
+  line-height: 30px;
+  background: #fff;
 }
-.container {
-  margin: 0 auto;
-  min-width: 900px;
-  max-width: 1000px;
-  padding: 200px;
-  padding-top: 100px;
+.isDone {
+  text-align: center;
+  padding: 10px;
+}
+.wrap-scroll {
   display: flex;
-  justify-content: flex-start;
-  flex-direction: column;
-  flex: 1;
-  .view-nav .nav-list {
-    height: 100%;
-    margin: auto;
-    display: flex;
-    align-items: center;
-    position: relative;
-    padding-right: 100px;
-    .right {
-      position: absolute;
-      right: 0;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+.tag-block {
+  width: 250px;
+  margin-top: 52px;
+  .tag-list {
+    margin-top: 20px;
+    background-color: #fff;
+    padding: 10px 5px;
+    > div {
+      margin-right: 10px;
+      margin-bottom: 5px;
     }
   }
-
-  .view-nav .nav-list .nav-item {
-    height: 100%;
-    align-items: center;
+  .comment-card {
+    background-color: #fff;
+    margin-top: 20px;
+    /deep/.ivu-card-body {
+      padding: 0 10px;
+    }
+  }
+}
+.article-block {
+  width: 700px;
+  margin-right: 20px;
+  .article-nav {
+    width: 100%;
     display: flex;
-    flex-shrink: 0;
-    font-size: 1.16rem;
-    color: #71777c;
-    padding: 0 1rem;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    padding: 10px;
+    margin: 10px 0;
+    background: #fff;
+    .default-btn {
+      margin-right: 10px;
+    }
+    .article-select {
+      margin-right: 10px;
+      min-width: 100px;
+    }
+    .nav-rest {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
   }
-
-  .view-nav .nav-list .nav-item:first-child {
-    padding: 0 1rem 0 0;
-  }
-
-  .view-nav .nav-list .nav-item:last-child {
-    padding: 0 0 0 1rem;
-  }
-
-  .view-nav .nav-list .nav-item.active,
-  .view-nav .nav-list .nav-item:hover {
-    color: #007fff;
-  }
-
-  .view-nav .nav-list .nav-item a {
-    color: inherit;
-  }
-
-  .nav-item {
-    position: relative;
-    cursor: pointer;
-  }
-
-  .nav-item > a:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
-}
-.title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-  text-align: center;
-}
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-.links {
-  padding-top: 15px;
 }
 </style>

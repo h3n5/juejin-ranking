@@ -1,217 +1,169 @@
 <template>
-  <div ref="scroll" class="scroll" @wheel="onWheel">
-    <div class="article-block">
-      <div class="article-nav">
-        <selectupdown
-          v-for="item in select"
-          :key="item.type"
-          :item="item"
-          @changeSort="
-            ;(item.sort = item.sort === 'desc' ? 'asc' : 'desc'),
-              handleReachBottom(false)
-          "
-          @click="goSelect(item)"
-        />
-        <div class="nav-rest">
-          <Input
-            v-model="condition.title"
-            size="small"
-            search
-            enter-button
-            style="width: 300px;margin-right:10px;"
-            @on-search="handleReachBottom(false)"
-          />
-          <Tag
-            :color="
-              condition.sort === 'desc' &&
-              select.every((v) => v.selected === false)
-                ? 'primary'
-                : 'default'
-            "
-            @click.native="hot"
-            >热门</Tag
-          >
-        </div>
-      </div>
-      <div class="article-list">
-        <articlecom
-          v-for="(item, index) in list"
-          :key="index"
-          :article="item"
-        />
-      </div>
-      <div v-if="isDone" class="isDone">
-        已经到底了
-      </div>
+  <div class="container">
+    <h1 class="title">
+      <logo />
+      <span style="vertical-align: super;">juejin</span>
+    </h1>
+    <h2 class="subtitle">
+      <Input
+        v-model="search"
+        search
+        enter-button
+        size="large"
+        @click.native="goArticle"
+      />
+    </h2>
+    <div class="view-nav">
+      <ul class="nav-list left">
+        <li class="nav-item active">
+          <div class="category-popover-box">
+            <a>推荐</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="category-popover-box">
+            <a>后端</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="category-popover-box">
+            <a>前端</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="category-popover-box">
+            <a>Android</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="category-popover-box">
+            <a>iOS</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="category-popover-box">
+            <a>人工智能</a>
+          </div>
+        </li>
+        <li class="nav-item right">
+          <nuxt-link to="/tags">标签管理</nuxt-link>
+        </li>
+      </ul>
     </div>
-    <Spin v-if="showSpin" class="spin">加载中...</Spin>
-    <BackTop></BackTop>
   </div>
 </template>
+
 <script>
-import throttle from 'lodash.throttle'
-import { getArticle } from '@/api'
-import articlecom from '@/components/article'
-import selectupdown from '@/components/selectupdown'
+import Logo from '~/components/Logo.vue'
 export default {
-  name: 'Articles',
   components: {
-    articlecom,
-    selectupdown
-  },
-  async asyncData() {
-    const { success, data, count } = await getArticle({ sort: false })
-    if (success) {
-      return {
-        list: data,
-        count
-      }
-    }
+    Logo
   },
   data() {
     return {
-      isDone: false,
-      condition: {
-        title: '',
-        type: '',
-        sort: 'desc',
-        pageIndex: 0,
-        pageSize: 20
-      },
-      list: [],
-      count: 0,
-      showSpin: false,
-      select: [
-        {
-          type: 'createTime',
-          name: '创建时间',
-          sort: 'desc',
-          selected: false
-        },
-        {
-          type: 'thumbUpCount',
-          name: '点赞数',
-          sort: 'desc',
-          selected: false
-        },
-        {
-          type: 'commentCount',
-          name: '评论',
-          sort: 'desc',
-          selected: false
-        },
-        {
-          type: 'viewsCount',
-          name: '阅读数',
-          sort: 'desc',
-          selected: false
-        }
-      ]
+      search: ''
     }
   },
-  computed: {},
   methods: {
-    goSelect(item) {
-      this.select.forEach((element) => {
-        element.selected = false
-      })
-      item.selected = true
-      this.handleReachBottom(false)
-    },
-    hot() {
-      this.select.forEach((element) => {
-        element.selected = false
-      })
-
-      this.condition.sort = this.condition.sort === 'desc' ? 'asc' : 'desc'
-      this.condition.type = ''
-      this.handleReachBottom(false)
-    },
-    handleReachBottom(add = true) {
-      return new Promise((resolve) => {
-        if (!add) {
-          this.isDone = false
-          this.condition.pageIndex = 0
-        } else {
-          this.condition.pageIndex++
-        }
-        this.showSpin = true
-        const data = {
-          ...this.condition,
-          ...this.select.find((v) => v.selected)
-        }
-        if (this.isDone) {
-          this.showSpin = false
-          return this.$Message.warning('已经到底了')
-        }
-        getArticle(data).then((res) => {
-          if (res.success) {
-            if (add) {
-              this.list = this.list.concat(res.data)
-            } else {
-              this.list = res.data
-            }
-            if (this.list.length >= res.count) {
-              this.isDone = true
-            }
-          } else {
-            this.$Message.error(res.msg)
-          }
-          this.showSpin = false
-          resolve()
-        })
-      })
-    },
-    onWheel: throttle(
-      function(e) {
-        const direction = event.wheelDelta
-          ? event.wheelDelta
-          : -(event.detail || event.deltaY)
-        const el = document.documentElement
-        const scrollTop = el.scrollTop
-        const scrollHeight = el.scrollHeight
-        const clientHeight = el.clientHeight
-        const rest = scrollHeight - clientHeight
-        const condition = rest - scrollTop < rest / 3
-        if (direction < 0 && rest > 0) {
-          if (condition && !this.showSpin) {
-            this.handleReachBottom()
-          }
-        }
-      },
-      2000,
-      { trailing: false }
-    )
+    goArticle() {
+      this.$router.push('/articles?title=' + this.search)
+    }
   }
 }
 </script>
+
 <style lang="less" scope>
-.spin {
-  height: 30px;
-  line-height: 30px;
-  background: #fff;
+html,
+body,
+#__nuxt,
+#__layout,
+.ivu-layout {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
-.isDone {
-  text-align: center;
-}
-.article-block {
-  width: 1000px;
-  margin: auto;
-  .article-nav {
-    width: 100%;
+.container {
+  margin: 0 auto;
+  min-width: 900px;
+  max-width: 1000px;
+  padding: 200px;
+  padding-top: 100px;
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  flex: 1;
+  .view-nav .nav-list {
+    height: 100%;
+    margin: auto;
     display: flex;
-    flex-flow: row nowrap;
-    justify-content: space-between;
-    padding: 10px 0;
-    .article-select {
-      margin-right: 10px;
-    }
-    .nav-rest {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    padding-right: 100px;
+    .right {
+      position: absolute;
+      right: 0;
     }
   }
+
+  .view-nav .nav-list .nav-item {
+    height: 100%;
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    font-size: 1.16rem;
+    color: #71777c;
+    padding: 0 1rem;
+  }
+
+  .view-nav .nav-list .nav-item:first-child {
+    padding: 0 1rem 0 0;
+  }
+
+  .view-nav .nav-list .nav-item:last-child {
+    padding: 0 0 0 1rem;
+  }
+
+  .view-nav .nav-list .nav-item.active,
+  .view-nav .nav-list .nav-item:hover {
+    color: #007fff;
+  }
+
+  .view-nav .nav-list .nav-item a {
+    color: inherit;
+  }
+
+  .nav-item {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .nav-item > a:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+}
+.title {
+  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  display: block;
+  font-weight: 300;
+  font-size: 100px;
+  color: #35495e;
+  letter-spacing: 1px;
+  text-align: center;
+}
+.subtitle {
+  font-weight: 300;
+  font-size: 42px;
+  color: #526488;
+  word-spacing: 5px;
+  padding-bottom: 15px;
+}
+.links {
+  padding-top: 15px;
 }
 </style>
