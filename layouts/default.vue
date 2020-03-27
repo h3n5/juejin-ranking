@@ -1,7 +1,9 @@
 <template>
   <Layout id="Layout">
     <header class="header">
-      <img class="header-logo" src="../assets/logo.svg" />
+      <nuxt-link to="/">
+        <img class="header-logo" src="../assets/logo.svg" />
+      </nuxt-link>
     </header>
     <nuxt />
   </Layout>

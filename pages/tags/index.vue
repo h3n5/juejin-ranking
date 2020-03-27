@@ -8,7 +8,12 @@
       <li v-for="(item, index) in list" :key="index" class="tag-item">
         <Card>
           <div class="info-box">
-            <img class="tag_img" :src="item.icon" :alt="item.title" />
+            <img
+              class="tag_img"
+              :src="require('@/assets/code.png')"
+              :alt="item.title"
+              v-real-img="item.icon"
+            />
             <div class="title">{{ item.title }}</div>
             <div class="meta-box">
               <div class="meta-subscribe">{{ item.subscribersCount }} 关注</div>
@@ -19,7 +24,9 @@
                 :disabled="localTagsStable(item.title)"
                 size="small"
                 @click="goChange(item)"
-                >{{ !localTagsFind(item.title) ? `添加至首页` : '取消' }}</Button
+                >{{
+                  !localTagsFind(item.title) ? `添加至首页` : '取消'
+                }}</Button
               >
             </div>
           </div>
@@ -57,7 +64,7 @@ export default {
   computed: {
     ...mapGetters('local', ['localTagsFind', 'localTagsStable']),
     taglistHeight() {
-      return window.innerHeight - 50 || 800
+      return 800
     }
   },
   methods: {
