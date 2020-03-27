@@ -8,6 +8,6 @@ crontab.scheduleJob('0 0 * * 1', () => task())
 
 router.get('/getTag', findTag)
 router.post('/getArticle', findArticle)
-router.get('/refreshData', refreshData)
+router.post('/refreshData', refreshData)
 
 module.exports = router

@@ -12,10 +12,7 @@
           v-for="item in select"
           :key="item.type"
           :item="item"
-          @changeSort="
-            ;(item.sort = item.sort === 'desc' ? 'asc' : 'desc'),
-              handleReachBottom(false)
-          "
+          @changeSort="goSort(item)"
           @click="goSelect(item)"
         />
       </div>
@@ -27,7 +24,7 @@
             :key="index"
             closable
             @on-close="checks.splice(index, 1)"
-            >{{ item.name }}</Tag
+            >{{ item.title }}</Tag
           >
         </div>
         <articlecom
@@ -58,7 +55,9 @@
           v-for="(item, index) in localTags"
           :color="item.color"
           :key="index"
-          @click.native="addCheck(item)"
+          :closable="!item.stable"
+          @click.native="goCheck(item)"
+          @on-close="_localTagsRm(item)"
           >{{ item.title }}</Tag
         >
       </div>
@@ -66,7 +65,7 @@
         <Button icon="ios-add" type="dashed" size="small" to="/tags"
           >标签管理</Button
         >
-        <Button type="primary" size="small" to="/tags">更新数据</Button>
+        <Button type="primary" size="small" @click="isShowModalPost = true">同步数据</Button>
       </div>
       <Card class="comment-card" dis-hover>
         <p slot="title">
@@ -90,6 +89,7 @@
         </List>
       </Card>
     </div>
+    <ModalPost v-model="isShowModalPost" />
   </div>
 </template>
 <script>
@@ -97,22 +97,24 @@ import throttle from 'lodash.throttle'
 import { getArticle } from '@/api'
 import articlecom from '@/components/article'
 import selectupdown from '@/components/selectupdown'
-import { mapState } from 'vuex'
+import ModalPost from '@/components/ModalPost'
+import { mapState, mapMutations } from 'vuex'
 export default {
   name: 'Articles',
   components: {
     articlecom,
-    selectupdown
+    selectupdown,
+    ModalPost
   },
   async asyncData() {
-    const { success, data, count } = await getArticle({ sort: false })
+    const { success, data, count, msg } = await getArticle({ sort: false })
     if (success) {
       return {
         list: data,
         count
       }
     } else {
-      console.log('接口获取失败')
+      console.log('接口获取失败', msg)
     }
   },
   computed: {
@@ -120,14 +122,8 @@ export default {
   },
   data() {
     return {
+      isShowModalPost: false,
       checks: [],
-      items: [
-        { name: '后端', color: 'magenta' },
-        { name: '前端', color: 'success' },
-        { name: 'Android', color: 'gold' },
-        { name: 'iOS', color: '#FFA2D3' },
-        { name: '人工智能', color: 'primary' }
-      ],
       isDone: false,
       condition: {
         title: '',
@@ -179,8 +175,13 @@ export default {
     }
   },
   methods: {
-    addCheck(item) {
-      if (!this.checks.map((v) => v.name).includes(item.name)) {
+    ...mapMutations('local', ['_localTagsAdd', '_localTagsRm']),
+    goSort(item) {
+      item.sort = item.sort === 'desc' ? 'asc' : 'desc'
+      this.handleReachBottom(false)
+    },
+    goCheck(item) {
+      if (!this.checks.find((v) => v.title === item.title)) {
         this.checks.push(item)
       }
     },

@@ -13,3 +13,10 @@ export const getArticle = (params) => {
     data: params
   })
 }
+export const refreshData = (params) => {
+  return axios.request({
+    url: '/refreshData',
+    method: 'post',
+    data: params
+  })
+}

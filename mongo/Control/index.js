@@ -4,7 +4,7 @@ const task = require('../GetData/index')
 const eventBus = require('../util/eventBus')
 let taskFlag = true
 let progress = 0
-eventBus.on('articles-progress', (e) => (progress = e))
+eventBus.on('articles-progress', (e) => (progress = +e))
 async function findTag(req, res) {
   let { query } = req
   let { pageIndex = 0, pageSize = 20, title = '' } = query
@@ -81,7 +81,7 @@ async function findArticle(req, res) {
       tags.map((v) => ({
         tags: {
           $elemMatch: {
-            title: v.name
+            title: v.title
           }
         }
       }))
@@ -102,15 +102,15 @@ async function findArticle(req, res) {
   }
 }
 async function refreshData(req, res) {
-  let { query } = req
-  let { code } = query
+  let { body } = req
+  let { code } = body
   if (code === 'melt1993') {
     if (taskFlag) {
       taskFlag = false
       task().then(() => {
         taskFlag = true
       })
-      res.send({ success: true })
+      res.send({ success: true, msg: 0 })
     } else {
       res.send({ success: true, msg: progress })
     }

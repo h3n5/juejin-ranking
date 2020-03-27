@@ -15,7 +15,12 @@
               <div class="meta-article">{{ item.entryCount }} 文章</div>
             </div>
             <div class="flex-center">
-              <Button size="small" @click="goAdd(item)">添加至首页</Button>
+              <Button
+                :disabled="localTagsStable(item.title)"
+                size="small"
+                @click="goChange(item)"
+                >{{ !localTagsFind(item.title) ? `添加至首页` : '取消' }}</Button
+              >
             </div>
           </div>
         </Card>
@@ -25,15 +30,18 @@
 </template>
 <script>
 import { getTag } from '@/api'
+import { mapMutations, mapGetters } from 'vuex'
 export default {
   name: 'Tags',
   async asyncData() {
-    const { success, data, count } = await getTag()
+    const { success, data, count, msg } = await getTag()
     if (success) {
       return {
         list: data,
         count
       }
+    } else {
+      console.log('标签获取失败', msg)
     }
   },
   data() {
@@ -47,12 +55,20 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('local', ['localTagsFind', 'localTagsStable']),
     taglistHeight() {
-      return (this.$refs.taglist && this.$refs.taglist.offsetHeight) || 800
+      return window.innerHeight - 50 || 800
     }
   },
   methods: {
-    goAdd(item) {},
+    ...mapMutations('local', ['_localTagsAdd', '_localTagsRm']),
+    goChange(item) {
+      if (this.localTagsFind(item.title)) {
+        this._localTagsRm(item)
+      } else {
+        this._localTagsAdd(item)
+      }
+    },
     handleReachBottom() {
       return new Promise((resolve) => {
         this.condition.pageIndex++
