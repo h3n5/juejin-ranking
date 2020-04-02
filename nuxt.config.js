@@ -1,5 +1,8 @@
 module.exports = {
   mode: 'universal',
+  router: {
+    base: './'
+  },
   server: {
     port: require('./_target').port, // default: 3000
     host: '0.0.0.0' // default: localhost,
