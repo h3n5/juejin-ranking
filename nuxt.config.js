@@ -1,7 +1,7 @@
 module.exports = {
   mode: 'universal',
   server: {
-    port: 3333, // default: 3000
+    port: require('~/_target').port, // default: 3000
     host: '0.0.0.0' // default: localhost,
   },
   /*
