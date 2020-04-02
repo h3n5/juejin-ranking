@@ -38,6 +38,9 @@ export default {
         return this.value
       },
       set(v) {
+        if (!v) {
+          this.init()
+        }
         this.$emit('input', v)
       }
     }
@@ -46,16 +49,33 @@ export default {
     return {
       code: '',
       loading: false,
-      progress: 0
+      progress: 0,
+      timer: null
     }
   },
   methods: {
+    init() {
+      this.code = ''
+      this.loading = false
+      this.progress = 0
+      this.timer && clearTimeout(this.timer)
+    },
     submit() {
       this.loading = true
+      this.update()
+    },
+    update() {
       refreshData({ code: this.code }).then((res) => {
         if (res.success) {
           this.progress = res.msg
-          setTimeout()
+          if (this.progress < 100) {
+            this.timer = setTimeout(() => {
+              this.update()
+            }, 1000)
+          } else {
+            this.timer = null
+            this.loading = false
+          }
         } else {
           this.loading = false
           this.$Message.error('code error')

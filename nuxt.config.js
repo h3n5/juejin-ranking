@@ -33,7 +33,8 @@ module.exports = {
    */
   plugins: [
     '@/plugins/iview',
-    { src: '@/plugins/persistedstate.js', ssr: false }
+    { src: '@/plugins/persistedstate.js', ssr: false },
+    { src: '@/plugins/imgUrl.js', ssr: false }
   ],
   /*
    ** Nuxt.js dev-modules
