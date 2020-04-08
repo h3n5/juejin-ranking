@@ -17,6 +17,9 @@
     <div class="title-row flex-row">
       {{ article.title }}
     </div>
+    <div class="content-row flex-row">
+      {{ article.content }}
+    </div>
     <div class="btn-row flex-row">
       <ButtonGroup>
         <Button size="small" icon="md-thumbs-up">{{
@@ -115,7 +118,13 @@ export default {
     font-size: 16px;
     font-weight: 600;
     line-height: 1.2;
-    margin: 0.5rem 0 1rem;
+    margin: 0.5rem 0;
+  }
+  .content-row {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-bottom: 1rem;
   }
   .btn-row {
     color: #b2bac2;
