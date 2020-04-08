@@ -106,7 +106,7 @@ export default {
   }
   .flex-row {
     display: flex;
-    flex-flow: row nowrap;
+    flex-flow: row wrap;
     width: 100%;
     justify-content: flex-start;
   }

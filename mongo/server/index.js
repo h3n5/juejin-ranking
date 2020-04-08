@@ -5,10 +5,6 @@ const DB_URL = 'mongodb://melt:351258@127.0.0.1:27017/juejin'
 mongoose.connect(DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-  // auth: {
-  //   user: 'melt',
-  //   pass: '351258'
-  // }
 }) /** * 连接成功 */
 
 mongoose.connection.on('connected', function() {
