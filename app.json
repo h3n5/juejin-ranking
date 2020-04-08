@@ -1,0 +1,12 @@
+{
+  "name": "juejin",
+  "script": "./server/index.js",
+  "cwd": "./",
+  "watch": true,
+  "ignore_watch": [
+    "node_modules"
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

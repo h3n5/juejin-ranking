@@ -19,7 +19,7 @@ instance.interceptors.response.use(
     return data
   },
   (error) => {
-    return Promise.resolve(error)
+    return Promise.reject(error)
   }
 )
 

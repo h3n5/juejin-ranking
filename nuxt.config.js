@@ -1,7 +1,7 @@
 module.exports = {
   mode: 'universal',
   router: {
-    base: '/juejin/'
+    base: require('./_target').base
   },
   server: {
     port: require('./_target').port, // default: 3000
