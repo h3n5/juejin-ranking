@@ -1,4 +1,5 @@
-# juejin
+# juejin[![Build Status](https://www.travis-ci.org/h3n5/juejin-ranking.svg?branch=master)]
+(https://www.travis-ci.org/h3n5/juejin-ranking)
 
 > My premium Nuxt.js project
 
