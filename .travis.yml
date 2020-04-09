@@ -5,3 +5,19 @@ node_js:
 branchs:
   only:
     - master #指定只有检测到master分支有变动时才执行任务
+install:
+- npm install
+script:
+- npm run build
+env:
+  global:
+    secure: *********
+addons:
+  ssh_known_hosts:
+  - m3lt.cn #受信主机，你的Linux服务器ip
+before_install:
+- openssl aes-256-cbc -K $encrypted_****_key -iv $encrypted_****_iv
+  -in id_rsa.enc -out ~/.ssh/id_rsa -d
+after_success:
+- chmod 600 ~/.ssh/id_rsa   #还是Linux文件权限问题
+- ssh travis@m3lt.cn -o StrictHostKeyChecking=no 'cd ~/juejin-ranking && git pull && npm install && npm run build'   #使用ssh连接服务
