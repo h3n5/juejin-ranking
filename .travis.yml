@@ -14,7 +14,7 @@ cache:
     - node_modules
 addons:
   ssh_known_hosts:
-    - m3lt.cn #受信主机，你的Linux服务器ip
+    - 49.235.211.168 #受信主机，你的Linux服务器ip
 after_success:
   - chmod 600 ~/.ssh/id_rsa #还是Linux文件权限问题
-  - ssh travis@m3lt.cn -o StrictHostKeyChecking=no 'cd ~/juejin-ranking && git pull && npm install && npm run build' #使用ssh连接服务
+  - ssh travis@49.235.211.168 -o StrictHostKeyChecking=no 'cd ~/juejin-ranking && git pull && npm install && npm run build' #使用ssh连接服务
