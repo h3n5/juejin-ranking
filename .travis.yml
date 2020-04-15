@@ -20,4 +20,4 @@ before_install:
 - chmod 600 ~/.ssh/id_rsa
 after_success:
 - ssh travis@49.235.211.168 -o StrictHostKeyChecking=no 'cd ~/juejin-ranking && git
-  pull && npm install && npm run build && npm run start'
+  pull && npm install && npm run build && pm2 start npm -- run start --name juejin'
