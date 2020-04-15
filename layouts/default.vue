@@ -1,14 +1,26 @@
 <template>
   <Layout id="Layout">
-    <header class="header">
+    <header class="header" :class="{ visible: headerVisable }">
       <nuxt-link to="/">
         <img class="header-logo" src="../assets/logo.svg" />
       </nuxt-link>
     </header>
-    <nuxt />
+    <nuxt class="layout-ctx" />
   </Layout>
 </template>
-
+<script>
+export default {
+  name: 'Main',
+  data() {
+    return {
+      headerVisable: true
+    }
+  },
+  mounted() {
+    this.$eventBus.$on('headerVisable', (e) => (this.headerVisable = e))
+  }
+}
+</script>
 <style>
 html {
   font-family: 'rubik,arial', 'Source Sans Pro', -apple-system,
@@ -37,6 +49,15 @@ html {
   font-size: 20px;
   background-color: #fff;
   padding: 0 40px;
+  position: fixed;
+  transition: all 0.2s;
+  transform: translate3d(0, -100%, 0);
+}
+.visible {
+  transform: translateZ(0);
+}
+.layout-ctx {
+  padding-top: 50px;
 }
 .header-logo {
   vertical-align: middle;

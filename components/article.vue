@@ -14,17 +14,14 @@
         {{ item.title }}
       </div>
     </div>
-    <div class="title-row flex-row">
-      {{ article.title }}
-    </div>
-    <div class="content-row flex-row">
-      {{ article.content }}
+    <div class="title-row flex-row" v-html="searchFormat(article.title)"></div>
+    <div class="content-row flex-row" v-html="searchFormat(article.content)">
     </div>
     <div class="btn-row flex-row">
       <ButtonGroup>
-        <Button size="small" icon="md-thumbs-up">{{
-          article.collectionCount
-        }}</Button>
+        <Button size="small" icon="md-thumbs-up">
+          {{ article.collectionCount }}
+        </Button>
         <Button size="small" icon="md-mail">{{ article.commentsCount }}</Button>
       </ButtonGroup>
     </div>
@@ -66,6 +63,10 @@ export default {
     article: {
       type: Object,
       default: () => ({ tags: [] })
+    },
+    search: {
+      type: String,
+      default: ''
     }
   },
   filters: {
@@ -79,6 +80,14 @@ export default {
   methods: {
     goUrl() {
       window.open(this.article.originalUrl, '_blank')
+    },
+    searchFormat(ctx) {
+      if (this.search) {
+        let reg = new RegExp(this.search, 'g')
+        return ctx.replace(reg, (e) => `<span class="search-word">${e}</span>`)
+      } else {
+        return ctx
+      }
     }
   }
 }
@@ -93,6 +102,9 @@ export default {
   flex-flow: column wrap;
   color: #909090;
   border-bottom: 1px solid rgba(178, 186, 194, 0.15);
+  .search-word{
+    color: #e8001c;
+  }
   .info-row {
     .info-list {
       font-size: 12px;
@@ -125,6 +137,7 @@ export default {
     overflow: hidden;
     white-space: nowrap;
     margin-bottom: 1rem;
+    display: inline-block;
   }
   .btn-row {
     color: #b2bac2;

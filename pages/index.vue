@@ -1,13 +1,14 @@
 <template>
-  <div ref="scroll" class="wrap-scroll" @wheel="onWheel">
+  <div ref="scroll" class="wrap-scroll" @wheel="onWheel($event), onNav()">
     <div class="article-block">
-      <div class="article-nav">
+      <div class="article-nav" :class="{ 'fix-zero': navFixZero }">
         <Button
           :type="condition.type ? 'text' : 'primary'"
           class="default-btn"
           @click="goDefault"
-          >默认</Button
         >
+          默认
+        </Button>
         <selectupdown
           v-for="item in select"
           :key="item.type"
@@ -24,12 +25,14 @@
             :key="index"
             closable
             @on-close="checks.splice(index, 1)"
-            >{{ item.title }}</Tag
           >
+            {{ item.title }}
+          </Tag>
         </div>
         <articlecom
           v-for="(item, index) in list"
           :key="index"
+          :search="condition.title"
           :article="item"
         />
       </div>
@@ -58,14 +61,17 @@
           :closable="!item.stable"
           @click.native="goCheck(item)"
           @on-close="_localTagsRm(item)"
-          >{{ item.title }}</Tag
         >
+          {{ item.title }}
+        </Tag>
       </div>
       <div class="tag-list">
-        <Button icon="ios-add" type="dashed" size="small" to="/tags"
-          >标签管理</Button
-        >
-        <Button type="primary" size="small" @click="isShowModalPost = true">同步数据</Button>
+        <Button icon="ios-add" type="dashed" size="small" to="/tags">
+          标签管理
+        </Button>
+        <Button type="primary" size="small" @click="isShowModalPost = true">
+          同步数据
+        </Button>
       </div>
       <Card class="comment-card" dis-hover>
         <p slot="title">
@@ -122,6 +128,7 @@ export default {
   },
   data() {
     return {
+      navFixZero: false,
       isShowModalPost: false,
       checks: [],
       isDone: false,
@@ -243,7 +250,7 @@ export default {
       })
     },
     onWheel: throttle(
-      function(e) {
+      function(event) {
         const direction = event.wheelDelta
           ? event.wheelDelta
           : -(event.detail || event.deltaY)
@@ -253,6 +260,7 @@ export default {
         const clientHeight = el.clientHeight
         const rest = scrollHeight - clientHeight
         const condition = rest - scrollTop < rest / 3
+
         if (direction < 0 && rest > 0) {
           if (condition && !this.showSpin) {
             this.handleReachBottom()
@@ -260,8 +268,14 @@ export default {
         }
       },
       2000,
-      { trailing: false }
-    )
+      { trailing: false, leading: false }
+    ),
+    onNav() {
+      const el = document.documentElement
+      const scrollTop = el.scrollTop
+      this.navFixZero = scrollTop > 400
+      this.$eventBus.$emit('headerVisable', !this.navFixZero)
+    }
   }
 }
 </script>
@@ -303,14 +317,18 @@ export default {
 .article-block {
   width: 700px;
   margin-right: 20px;
+  margin-top: 60px;
   .article-nav {
-    width: 100%;
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
     padding: 10px;
-    margin: 10px 0;
     background: #fff;
+    position: fixed;
+    top: 60px;
+    z-index: 2;
+    width: 700px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     .default-btn {
       margin-right: 10px;
     }
@@ -324,6 +342,9 @@ export default {
       align-items: center;
       justify-content: flex-end;
     }
+  }
+  .fix-zero {
+    top: 0;
   }
 }
 </style>
