@@ -112,12 +112,17 @@ export default {
     selectupdown,
     ModalPost
   },
-  async asyncData() {
-    const { success, data, count, msg } = await getArticle({ sort: false })
+  async asyncData({ query = {} }) {
+    const { title = '' } = query
+    const { success, data, count, msg } = await getArticle({
+      sort: false,
+      title
+    })
     if (success) {
       return {
         list: data,
-        count
+        count,
+        title
       }
     } else {
       console.log('接口获取失败', msg)
@@ -132,6 +137,7 @@ export default {
       isShowModalPost: false,
       checks: [],
       isDone: false,
+      title: '',
       condition: {
         title: '',
         type: '',
@@ -179,6 +185,12 @@ export default {
         this.condition.tags = []
       }
       this.handleReachBottom(false)
+    },
+    title: {
+      handler(v) {
+        this.condition.title = v
+      },
+      immediate: true
     }
   },
   methods: {

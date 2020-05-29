@@ -1,5 +1,5 @@
 <template>
-  <div class="article" @click="goUrl">
+  <a :href="article.originalUrl" target="_blank" class="article">
     <div class="info-row flex-row">
       <div class="info-list info-list--purple">
         专栏
@@ -25,7 +25,7 @@
         <Button size="small" icon="md-mail">{{ article.commentsCount }}</Button>
       </ButtonGroup>
     </div>
-  </div>
+  </a>
 </template>
 <script>
 const getTimeWord = (dateTimeStamp) => {
@@ -83,7 +83,7 @@ export default {
     },
     searchFormat(ctx) {
       if (this.search) {
-        let reg = new RegExp(this.search, 'g')
+        let reg = new RegExp(this.search, 'gi')
         return ctx.replace(reg, (e) => `<span class="search-word">${e}</span>`)
       } else {
         return ctx
