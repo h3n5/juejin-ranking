@@ -1,21 +1,23 @@
 const Tag = require('../Model/tag')
 const Article = require('../Model/article')
+const Update = require('../Model/update')
 const task = require('../GetData/index')
 const eventBus = require('../util/eventBus')
+const moment = require('moment')
 let taskFlag = true
 let progress = 0
 eventBus.on('articles-progress', (e) => (progress = +e))
 async function findTag(req, res) {
-  let { query } = req
-  let { pageIndex = 0, pageSize = 20, title = '' } = query
-  let conditions = {}
-  let sort = {
-    subscribersCount: -1
-  }
-  if (title) {
-    conditions.title = { $regex: title, $options: 'gi' }
-  }
   try {
+    let { query } = req
+    let { pageIndex = 0, pageSize = 20, title = '' } = query
+    let conditions = {}
+    let sort = {
+      subscribersCount: -1
+    }
+    if (title) {
+      conditions.title = { $regex: title, $options: 'gi' }
+    }
     let data = await Promise.all([
       Tag.find(conditions)
         .sort(sort)
@@ -102,21 +104,36 @@ async function findArticle(req, res) {
   }
 }
 async function refreshData(req, res) {
-  let { body } = req
-  let { code } = body
-  if (code === 'melt1993') {
-    if (taskFlag) {
-      taskFlag = false
-      task().then(() => {
+  try {
+    let { code } = req.body
+    if (code === 'melt1993') {
+      if (taskFlag) {
+        taskFlag = false
+        let progress = await new Update({
+          updateTime: moment().format('YYYY-MM-DD HH-mm-ss'),
+          progress: 0
+        }).save()
+        await task()
         taskFlag = true
-      })
-      res.send({ success: true, msg: 0 })
+        res.send({ success: true, msg: progress._id })
+      } else {
+        res.send({ success: false, msg: 'loading ……' })
+      }
     } else {
-      res.send({ success: true, msg: progress })
+      res.send({ success: false })
     }
-  } else {
-    res.send({ success: false })
+  } catch (error) {
+    res.send({ success: false, msg: error })
   }
 }
 
-module.exports = { findTag, findArticle, refreshData }
+async function getRefresh(req, res) {
+  try {
+    let { id } = req.query
+    let data = await Update.findById(id).exec()
+    res.send({ success: true, progress: data.progress || 0 })
+  } catch (error) {
+    res.send({ success: false })
+  }
+}
+module.exports = { findTag, findArticle, refreshData, getRefresh }

@@ -21,27 +21,21 @@ function promiseLimit(arr = [], num = 5, request, cb) {
           .forEach((v) => {
             tmpArr = tmpArr.concat(v.d.entrylist)
           })
-        if (cb && tmpArr.length >= limit) {
-          cb(tmpArr)
+        if (tmpArr.length >= limit || (tmpArr.length < limit && !arr.length)) {
+          await cb(tmpArr)
           tmpArr = []
         }
-        console.log(
-          `已完成${allLength - arr.length}个，还剩余${arr.length}个，进度${(
-            ((allLength - arr.length) / allLength) *
-            100
-          ).toFixed(2)}%`
-        )
-        eventBus.emit(
-          'articles-progress',
-          (((allLength - arr.length) / allLength) * 100).toFixed(2)
-        )
+        let finishNum = allLength - arr.length
+        let restNum = arr.length
+        let progress = ((finishNum / allLength) * 100).toFixed(2)
+        console.log(`已完成${finishNum}，还剩余${restNum}，进度${progress}%`)
+        eventBus.emit('articles-progress', progress)
       } catch (error) {
         console.log('timeout')
       }
     }
     const end = Date.now()
-    console.log(`全部完成！总共计时${(end - start) / 1000}s`)
-    resolve(tmpArr)
+    resolve(console.log(`全部完成！总共计时${(end - start) / 1000}s`))
   })
 }
 

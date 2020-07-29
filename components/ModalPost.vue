@@ -16,14 +16,14 @@
     </Form>
     <div slot="footer">
       <Button type="text" @click="isShow = false">关闭</Button>
-      <Button type="primary" @click="submit" :loading="loading">{{
-        loading ? '同步中' : '同步'
-      }}</Button>
+      <Button type="primary" @click="submit" :loading="loading">
+        {{ loading ? '同步中' : '同步' }}
+      </Button>
     </div>
   </Modal>
 </template>
 <script>
-import { refreshData } from '@/api'
+import { refreshData, getRefresh } from '@/api'
 export default {
   name: 'compontent',
   props: {
@@ -67,20 +67,24 @@ export default {
     update() {
       refreshData({ code: this.code }).then((res) => {
         if (res.success) {
-          this.progress = res.msg
-          if (this.progress < 100) {
-            this.timer = setTimeout(() => {
-              this.update()
-            }, 1000)
-          } else {
-            this.timer = null
-            this.loading = false
-          }
+          this.getProgress(res.msg)
         } else {
           this.loading = false
           this.$Message.error('code error')
         }
       })
+    },
+    async getProgress(id) {
+      let res = await getRefresh({ id: id })
+      this.progress = res.msg
+      if (this.progress < 100) {
+        this.timer = setTimeout(() => {
+          this.getProgress(id)
+        }, 1000)
+      } else {
+        this.timer = null
+        this.loading = false
+      }
     }
   }
 }

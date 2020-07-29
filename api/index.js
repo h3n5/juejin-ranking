@@ -20,3 +20,10 @@ export const refreshData = (params) => {
     data: params
   })
 }
+export const getRefresh = (params) => {
+  return axios.request({
+    url: '/refreshData',
+    method: 'get',
+    params: params
+  })
+}

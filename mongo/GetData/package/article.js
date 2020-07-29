@@ -1,6 +1,6 @@
+const Article = require('../../Model/article')
 const request = require('../axios')
 const { tagArticleListUrl } = require('../url')
-const Article = require('../../Model/article')
 const { promiseLimit } = require('../../util')
 function getArticles(tags = []) {
   return new Promise((resolve) => {
@@ -13,26 +13,27 @@ function getArticles(tags = []) {
       )
     }, [])
 
-    promiseLimit(Task, 100, request, cb).then((arts) => {
-      cb(arts)
-      resolve()
-      console.log('End')
+    promiseLimit(Task, 100, request, cb).then(() => {
+      resolve(console.log('End'))
     })
 
     function cb(arts) {
-      console.log('开始保存至数据库')
-      const saveData = arts.map((v) => ({
-        updateOne: {
-          filter: { _id: v.objectId },
-          update: { $set: { ...v, _id: v.objectId } },
-          upsert: true
-        }
-      }))
-      Article.bulkWrite(saveData)
-        .then(() => {
-          console.log('保存成功')
-        })
-        .catch((e) => console.log('保存失败', e))
+      if (!arts.length) return false
+      return new Promise((re, rj) => {
+        console.log('开始保存至数据库')
+        const saveData = arts.map((v) => ({
+          updateOne: {
+            filter: { _id: v.objectId },
+            update: { $set: { ...v, _id: v.objectId } },
+            upsert: true
+          }
+        }))
+        Article.bulkWrite(saveData)
+          .then(() => {
+            re(console.log('保存成功'))
+          })
+          .catch((e) => rj(console.log('保存失败', e)))
+      })
     }
   })
 }
