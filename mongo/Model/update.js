@@ -2,7 +2,7 @@ const mongoose = require('../server')
 const Schema = mongoose.Schema
 
 const updateSchema = new Schema({
-  updateTime: String,
+  updateTime: Date,
   progress: Number
 })
 

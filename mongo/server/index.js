@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const DB_URL = 'mongodb://melt:351258@127.0.0.1:27017/juejin'
+const DB_URL = 'mongodb://melt:351258@m3lt.cn:27017/juejin'
 
 mongoose.connect(DB_URL, {
   useNewUrlParser: true,
@@ -19,4 +19,5 @@ mongoose.connection.on('disconnected', function() {
   console.log('Mongoose connection disconnected')
 })
 
+mongoose.set('useFindAndModify', false)
 module.exports = mongoose

@@ -18,7 +18,7 @@
         />
       </div>
       <div class="article-list">
-        <div style="margin-bottom:10px">
+        <div style="margin:10px 0">
           <Tag
             v-for="(item, index) in checks"
             :color="item.color"
@@ -280,7 +280,7 @@ export default {
         }
       },
       2000,
-      { trailing: false, leading: false }
+      { trailing: true, leading: false }
     ),
     onNav() {
       const el = document.documentElement

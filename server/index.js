@@ -17,11 +17,11 @@ async function start() {
     const builder = new Builder(nuxt)
     await builder.build()
   }
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: false }));
-  if (!config.dev) {
+  app.use(bodyParser.json())
+  app.use(bodyParser.urlencoded({ extended: false }))
+  // if (!config.dev) {
     app.use('/api', require('../mongo'))
-  }
+  // }
   // Give nuxt middleware to express
   app.use(nuxt.render)
   // Listen the server

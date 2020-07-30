@@ -1,7 +1,7 @@
 import axios from 'axios'
-
+import { apiUrl } from '../_target'
 const instance = axios.create({
-  baseURL: require('../_target').apiUrl,
+  baseURL: apiUrl,
   headers: {}
 })
 

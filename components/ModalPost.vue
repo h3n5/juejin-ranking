@@ -76,7 +76,7 @@ export default {
     },
     async getProgress(id) {
       let res = await getRefresh({ id: id })
-      this.progress = res.msg
+      this.progress = res.progress
       if (this.progress < 100) {
         this.timer = setTimeout(() => {
           this.getProgress(id)

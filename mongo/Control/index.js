@@ -3,10 +3,19 @@ const Article = require('../Model/article')
 const Update = require('../Model/update')
 const task = require('../GetData/index')
 const eventBus = require('../util/eventBus')
-const moment = require('moment')
 let taskFlag = true
-let progress = 0
-eventBus.on('articles-progress', (e) => (progress = +e))
+let progress = null
+eventBus.on('articles-progress', (e) => {
+  if (progress) {
+    Update.findOneAndUpdate(
+      { _id: progress._id },
+      { $set: { progress: +e } },
+      function(err, e) {
+        if (err) console.log(err)
+      }
+    )
+  }
+})
 async function findTag(req, res) {
   try {
     let { query } = req
@@ -109,8 +118,8 @@ async function refreshData(req, res) {
     if (code === 'melt1993') {
       if (taskFlag) {
         taskFlag = false
-        let progress = await new Update({
-          updateTime: moment().format('YYYY-MM-DD HH-mm-ss'),
+        progress = await new Update({
+          updateTime: new Date(),
           progress: 0
         }).save()
         await task()
