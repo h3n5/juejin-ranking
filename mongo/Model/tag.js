@@ -2,20 +2,16 @@ const mongoose = require('../server')
 const Schema = mongoose.Schema
 
 const tagSchema = new Schema({
-  id: String,
-  title: String,
-  createdAt: String,
-  updatedAt: String,
+  back_ground: String,
   color: String,
+  concern_user_count: Number,
   icon: String,
-  background: String,
-  showOnNav: Boolean,
-  relationTagId: String,
-  alias: String,
-  isCategory: Boolean,
-  entryCount: Number,
-  subscribersCount: Number,
-  isSubscribe: Boolean
+  id: Number,
+  post_article_count: Number,
+  show_navi: Number,
+  tag_alias: String,
+  tag_id: String,
+  tag_name: String
 })
 
 module.exports = mongoose.model('tags', tagSchema)

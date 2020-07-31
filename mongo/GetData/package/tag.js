@@ -1,16 +1,12 @@
 const request = require('../axios')
-const { tagListUrl } = require('../url')
+// const { tagListUrl } = require('../url')
 const Tag = require('../../Model/tag')
 async function getTags() {
-  const {
-    d: { tags }
-  } = await request.get(tagListUrl, {
-    headers: {
-      'X-Juejin-Src': 'web',
-      'X-Juejin-Token':
-        'eyJhY2Nlc3NfdG9rZW4iOiJ3NlpSMDJTb1VxRFo0RThiIiwicmVmcmVzaF90b2tlbiI6IkdZTWxTc2lQTkVtSzFvNmIiLCJ0b2tlbl90eXBlIjoibWFjIiwiZXhwaXJlX2luIjoyNTkyMDAwfQ=='
-    }
-  })
+  let url = 'https://apinew.juejin.im/tag_api/v1/query_tag_list'
+  let postData = { sort_type: 1, cursor: '0', limit: 10000000 }
+  let headers = { 'content-type': 'application/json' }
+  let { data } = await request.post(url, postData, headers)
+  let tags = data.map(v => v.tag)
   console.log(`tags count => ${tags.length}`)
   const saveData = tags.map((v) => ({
     updateOne: {
