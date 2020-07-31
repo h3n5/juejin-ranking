@@ -1,9 +1,9 @@
 const eventBus = require('./eventBus')
-
-function promiseLimit(arr = [], num = 5, request, cb) {
+const request = require('../GetData/axios')
+function promiseLimit(arr = [], num = 5, cb) {
   const allLength = arr.length
   const start = Date.now()
-  const limit = num * 100 * 10
+  const limit = num
   console.log(`共计${allLength}个请求，分${Math.ceil(arr.length / num)}次完成`)
   return new Promise(async (resolve) => {
     let tmpArr = []

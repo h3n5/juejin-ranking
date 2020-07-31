@@ -1,76 +1,39 @@
 const Article = require('../../Model/article')
 const request = require('../axios')
-const { tagArticleListUrl } = require('../url')
-const { promiseLimit } = require('../../util')
-function atob() {
-  Buffer.from(string, 'base64').toString()
-}
-function btoa(string) {
-  Buffer.from(string).toString('base64')
-}
-function getArticles(tags = []) {
-  const url =
-    'https://apinew.juejin.im/recommend_api/v1/article/recommend_tag_feed'
-
-  tags.map((v) => {
-    v.post_article_count
-  })
-
+const eventBus = require('../../util/eventBus')
+const tagArticleListUrl = 'https://apinew.juejin.im/recommend_api/v1/article/recommend_tag_feed'
+// const { promiseLimit } = require('../../util')
+// function atob() {
+//   Buffer.from(string, 'base64').toString()
+// }
+// function btoa(string) {
+//   Buffer.from(string).toString('base64')
+// }
+async function getArticles(tags = []) {a
   return new Promise((resolve) => {
-    const Task = tags.reduce((all, tag) => {
-      const pageIndexMax = Math.ceil(tag.entryCount / 100)
-      return all.concat(
-        Array(pageIndexMax)
-          .fill(0)
-          .map((_, index) => tagArticleListUrl(tag.id, index, 100))
-      )
-    }, [])
-    promiseLimit(Task, 100, request, cb).then(() => {
-      resolve(console.log('End'))
-    })
-
-    function cb(arts) {
-      if (!arts.length) return false
-      return new Promise((re, rj) => {
-        console.log('开始保存至数据库')
-        const saveData = arts.map((v) => ({
-          updateOne: {
-            filter: { _id: v.objectId },
-            update: { $set: { ...v, _id: v.objectId } },
-            upsert: true
-          }
-        }))
-        Article.bulkWrite(saveData)
-          .then(() => {
-            re(console.log('保存成功'))
-          })
-          .catch((e) => rj(console.log('保存失败', e)))
-      })
+    const Tasks = tags.map((v) => ({
+      url: tagArticleListUrl,
+      methos: 'POST',
+      data: { limit: v.post_article_count, tag_ids: [v.tagId] }
+    }))
+    for (let index = 0; index < Tasks.length; index++) {
+      let task = Tasks[index]
+      let res = await request(task)
+      await callback(res.data)
+      let progress = Number(((index / Tasks.length) * 100).toFixed(2))
+      eventBus.emit('articles-progress', progress)
     }
-  })
+    resolve(console.log('End'))
 
-  return new Promise((resolve) => {
-    const Task = tags.reduce((all, tag) => {
-      const pageIndexMax = Math.ceil(tag.entryCount / 100)
-      return all.concat(
-        Array(pageIndexMax)
-          .fill(0)
-          .map((_, index) => tagArticleListUrl(tag.id, index, 100))
-      )
-    }, [])
 
-    promiseLimit(Task, 100, request, cb).then(() => {
-      resolve(console.log('End'))
-    })
-
-    function cb(arts) {
-      if (!arts.length) return false
+    function callback(arts) {
       return new Promise((re, rj) => {
+        if (!arts.length) re()
         console.log('开始保存至数据库')
         const saveData = arts.map((v) => ({
           updateOne: {
-            filter: { _id: v.objectId },
-            update: { $set: { ...v, _id: v.objectId } },
+            filter: { _id: v.article_id },
+            update: { $set: { ...v, _id: v.article_id } },
             upsert: true
           }
         }))
