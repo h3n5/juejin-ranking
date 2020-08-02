@@ -9,7 +9,7 @@ eventBus.on('articles-progress', (e) => {
   if (progress) {
     Update.findOneAndUpdate(
       { _id: progress._id },
-      { $set: { progress: +e } },
+      { $set: { progress: e } },
       function(err, e) {
         if (err) console.log(err)
       }
@@ -18,14 +18,18 @@ eventBus.on('articles-progress', (e) => {
 })
 async function findTag(req, res) {
   try {
-    let { query } = req
-    let { pageIndex = 0, pageSize = 20, title = '' } = query
+    let { pageIndex = 0, pageSize = 20, keyword = '', type = 'hot' } = req.query
     let conditions = {}
-    let sort = {
-      subscribersCount: -1
-    }
-    if (title) {
-      conditions.title = { $regex: title, $options: 'gi' }
+    let sort =
+      type === 'hot'
+        ? {
+            'tag.concern_user_count': -1
+          }
+        : {
+            tag_id: -1
+          }
+    if (keyword) {
+      conditions['tag.tag_name'] = { $regex: keyword, $options: 'gi' }
     }
     let data = await Promise.all([
       Tag.find(conditions)
@@ -50,49 +54,48 @@ async function findArticle(req, res) {
     sort = 'desc',
     tags = []
   } = body
+
   let conditions = {}
-  let sortConditon = {}
-  switch (type) {
-    case 'thumbUpCount':
-      sortConditon = { collectionCount: sort === 'desc' ? -1 : 1 }
-      break
-    case 'createTime':
-      sortConditon = { createdAt: sort === 'desc' ? -1 : 1 }
-      break
-    case 'commentCount':
-      sortConditon = { commentsCount: sort === 'desc' ? -1 : 1 }
-      break
-    case 'viewsCount':
-      sortConditon = { viewsCount: sort === 'desc' ? -1 : 1 }
-      break
-    default:
-      sortConditon = {
-        rankIndex: -1
-      }
+
+  let sortValue = sort === 'desc' ? -1 : 1
+  let typeMap = {
+    thumbUpCount: { 'article_info.digg_count': sortValue },
+    createTime: { 'article_info.ctime': sortValue },
+    commentCount: { 'article_info.comment_count': sortValue },
+    viewsCount: { 'article_info.view_count': sortValue }
   }
+  let sortConditon = typeMap[type] || { 'article_info.rank_index': -1 }
+
   if (title) {
     conditions.$or = [
       {
-        title: {
+        'article_info.title': {
           $regex: title,
           $options: 'gi'
         }
       },
       {
-        content: {
+        'article_info.brief_content': {
+          $regex: title,
+          $options: 'gi'
+        }
+      },
+      {
+        'article_info.article_id': {
           $regex: title,
           $options: 'gi'
         }
       }
     ]
   }
+
   if (tags.length) {
     if (!conditions.$or) conditions.$or = []
     conditions.$or = conditions.$or.concat(
       tags.map((v) => ({
         tags: {
           $elemMatch: {
-            title: v.title
+            tag_name: v.title
           }
         }
       }))
@@ -122,9 +125,9 @@ async function refreshData(req, res) {
           updateTime: new Date(),
           progress: 0
         }).save()
-        await task()
         taskFlag = true
         res.send({ success: true, msg: progress._id })
+        task()
       } else {
         res.send({ success: false, msg: 'loading ……' })
       }

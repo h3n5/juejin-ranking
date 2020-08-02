@@ -30,9 +30,18 @@ const mutations = {
   _localTagsRm(state, val) {
     let index = state.localTags.findIndex((v) => v.title === val.title)
     if (index !== -1) {
-      state.localTags.splice(val)
+      state.localTags.splice(index, 1)
     }
   }
 }
-
-export default { namespaced: true, state, mutations, getters }
+const actions = {
+  selectTag({ getters, commit }, value) {
+    let flag = getters.localTagsFind(value.title)
+    if (flag) {
+      commit('_localTagsRm', value)
+    } else {
+      commit('_localTagsAdd', value)
+    }
+  }
+}
+export default { namespaced: true, state, mutations, getters, actions }

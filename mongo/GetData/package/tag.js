@@ -8,8 +8,8 @@ async function getTags() {
     let tags = res.data
     const saveData = tags.map((v) => ({
       updateOne: {
-        filter: { _id: v.tag_id },
-        update: { $set: { ...v, _id: v.tag_id } },
+        filter: { tag_id: v.tag_id },
+        update: { $set: v },
         upsert: true
       }
     }))

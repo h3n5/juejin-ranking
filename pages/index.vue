@@ -107,22 +107,28 @@ import ModalPost from '@/components/ModalPost'
 import { mapState, mapMutations } from 'vuex'
 export default {
   name: 'Articles',
+  props: {
+    tag: {
+      type: String,
+      default: ''
+    }
+  },
   components: {
     articlecom,
     selectupdown,
     ModalPost
   },
   async asyncData({ query = {} }) {
-    const { title = '' } = query
+    const { tag = '' } = query
     const { success, data, count, msg } = await getArticle({
-      sort: false,
-      title
+      sort: false
     })
+    let checks = tag ? [{ title: tag }] : []
     if (success) {
       return {
         list: data,
         count,
-        title
+        checks: checks
       }
     } else {
       console.log('接口获取失败', msg)
@@ -137,7 +143,6 @@ export default {
       isShowModalPost: false,
       checks: [],
       isDone: false,
-      title: '',
       condition: {
         title: '',
         type: '',

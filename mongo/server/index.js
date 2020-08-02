@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const DB_URL = 'mongodb://root:351258@m3lt.cn:27017/juejin_new'
+const DB_URL = 'mongodb://melt:351258@m3lt.cn:27017/juejin_new'
 
 mongoose.connect(DB_URL, {
   useNewUrlParser: true,

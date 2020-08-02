@@ -1,38 +1,28 @@
 <template>
-  <a :href="article.article_info.link_url" target="_blank" class="article">
+  <a :href="article.originalUrl" target="_blank" class="article">
     <div class="info-row flex-row">
       <div class="info-list info-list--purple">
         专栏
       </div>
       <div class="info-list">
-        {{ article.author_user_info.user_name }}
+        {{ article.user.username }}
       </div>
       <div class="info-list">
-        {{ article.article_info.ctime | dateFormat }}
+        {{ article.createdAt | dateFormat }}
       </div>
       <div class="info-list" v-for="(item, index) in article.tags" :key="index">
-        {{ item.tag_name }}
+        {{ item.title }}
       </div>
     </div>
-    <div
-      class="title-row flex-row"
-      v-html="searchFormat(article.article_info.title)"
-    ></div>
-    <div
-      class="content-row flex-row"
-      v-html="searchFormat(article.article_info.brief_content)"
-    ></div>
+    <div class="title-row flex-row" v-html="searchFormat(article.title)"></div>
+    <div class="content-row flex-row" v-html="searchFormat(article.content)">
+    </div>
     <div class="btn-row flex-row">
       <ButtonGroup>
         <Button size="small" icon="md-thumbs-up">
-          {{ article.article_info.digg_count }}
+          {{ article.collectionCount }}
         </Button>
-        <Button size="small" icon="md-mail">
-          {{ article.article_info.comment_count }}
-        </Button>
-        <Button size="small" icon="ios-book">
-          {{ article.article_info.view_count }}
-        </Button>
+        <Button size="small" icon="md-mail">{{ article.commentsCount }}</Button>
       </ButtonGroup>
     </div>
   </a>
@@ -42,24 +32,19 @@ const getTimeWord = (dateTimeStamp) => {
   if (typeof dateTimeStamp === 'string') {
     dateTimeStamp = new Date(dateTimeStamp).getTime()
   }
-  let minute = 1000 * 60
-  let hour = minute * 60
-  let day = hour * 24
-  let month = day * 30
-  let year = month * 12
+  var minute = 1000 * 60
+  var hour = minute * 60
+  var day = hour * 24
+  var month = day * 30
   let result = ''
-  let now = new Date().getTime()
-
-  let diffValue = now - dateTimeStamp
-  let yearC = diffValue / year
-  let monthC = diffValue / month
-  let weekC = diffValue / (7 * day)
-  let dayC = diffValue / day
-  let hourC = diffValue / hour
-  let minC = diffValue / minute
-  if (yearC >= 1) {
-    return parseInt(yearC) + '年前'
-  } else if (monthC >= 1) {
+  var now = new Date().getTime()
+  var diffValue = now - dateTimeStamp
+  var monthC = diffValue / month
+  var weekC = diffValue / (7 * day)
+  var dayC = diffValue / day
+  var hourC = diffValue / hour
+  var minC = diffValue / minute
+  if (monthC >= 1) {
     result = parseInt(monthC) + '个月前'
   } else if (weekC >= 1) {
     result = parseInt(weekC) + '周前'
@@ -86,13 +71,16 @@ export default {
   },
   filters: {
     dateFormat(v = '') {
-      return getTimeWord(v * 1000)
+      return getTimeWord(+new Date(v.replace(/Z/, '')) + 8 * 3600 * 1000)
     }
   },
   data() {
     return {}
   },
   methods: {
+    goUrl() {
+      window.open(this.article.originalUrl, '_blank')
+    },
     searchFormat(ctx) {
       if (this.search) {
         let reg = new RegExp(this.search, 'gi')
@@ -114,7 +102,7 @@ export default {
   flex-flow: column wrap;
   color: #909090;
   border-bottom: 1px solid rgba(178, 186, 194, 0.15);
-  .search-word {
+  .search-word{
     color: #e8001c;
   }
   .info-row {
