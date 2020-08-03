@@ -84,6 +84,7 @@
             target="_blank"
             :href="item.article_info.link_url"
             :key="item._id"
+            @click="_preveousTags(item.tags)"
           >
             <ListItem>
               <ListItemMeta :title="item.article_info.title" />

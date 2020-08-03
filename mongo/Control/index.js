@@ -187,7 +187,6 @@ async function getRecomment(req, res) {
         .limit(5)
         .exec()
     } else {
-      console.time('mongoose')
       let conditions = {
         $or: tags.map((v) => ({
           tags: {
@@ -203,12 +202,9 @@ async function getRecomment(req, res) {
         'article_info.tag_ids': 1,
         'article_info.link_url': 1
       }).exec()
-      console.timeEnd('mongoose')
-      console.log('AutoConsole: getRecomment -> articles', articles.length)
-      console.time('calc')
       for (const article of articles) {
         article.tags = article.tag_ids
-          ? article.tag_ids.map((v) => ({ id: v }))
+          ? article.tag_ids.map((v) => ({ id: v, tag_id: v }))
           : []
         article._jaccard =
           arrIntersection(tags, article.tags) /
@@ -216,7 +212,6 @@ async function getRecomment(req, res) {
             arrIntersection(tags, article.tags))
       }
       result = articles.sort((a, b) => b._jaccard - a._jaccard).slice(0, 5)
-      console.timeEnd('calc')
     }
     res.send({ success: true, data: result })
   } catch (error) {
