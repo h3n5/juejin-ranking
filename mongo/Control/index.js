@@ -148,4 +148,80 @@ async function getRefresh(req, res) {
     res.send({ success: false })
   }
 }
-module.exports = { findTag, findArticle, refreshData, getRefresh }
+
+function arrCollection(left, right) {
+  let res = []
+  if (left.length === 0) {
+    return right.length
+  }
+  if (right.length === 0) {
+    return left.length
+  }
+  let target = left.concat(right)
+  let map = new Map()
+  target.forEach((v) => {
+    if (!map.has(v.id)) {
+      map.set(v.id, v)
+      res.push(v)
+    }
+  })
+  return res.length
+}
+
+function arrIntersection(left, right) {
+  if (left.length === 0 || right.length === 0) {
+    return 0
+  }
+  let less = left.length < right.length ? left : right
+  let more = left.length >= right.length ? left : right
+  let res = less.filter((v) => more.map((_) => _.id).includes(v.id))
+  return res.length
+}
+
+async function getRecomment(req, res) {
+  try {
+    let { tags } = req.body
+    let result = []
+    if (!tags || tags.length === 0) {
+      result = await Article.find()
+        .limit(5)
+        .exec()
+    } else {
+      console.time('mongoose')
+      let conditions = {
+        $or: tags.map((v) => ({
+          tags: {
+            $elemMatch: {
+              tag_id: v.tag_id
+            }
+          }
+        }))
+      }
+
+      let articles = await Article.find(conditions, {
+        'article_info.title': 1,
+        'article_info.tag_ids': 1,
+        'article_info.link_url': 1
+      }).exec()
+      console.timeEnd('mongoose')
+      console.log('AutoConsole: getRecomment -> articles', articles.length)
+      console.time('calc')
+      for (const article of articles) {
+        article.tags = article.tag_ids
+          ? article.tag_ids.map((v) => ({ id: v }))
+          : []
+        article._jaccard =
+          arrIntersection(tags, article.tags) /
+          (arrCollection(tags, article.tags) -
+            arrIntersection(tags, article.tags))
+      }
+      result = articles.sort((a, b) => b._jaccard - a._jaccard).slice(0, 5)
+      console.timeEnd('calc')
+    }
+    res.send({ success: true, data: result })
+  } catch (error) {
+    console.log('AutoConsole: getRecomment -> error', error)
+    res.send({ success: false, error: error })
+  }
+}
+module.exports = { findTag, findArticle, refreshData, getRefresh, getRecomment }

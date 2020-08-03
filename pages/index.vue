@@ -34,6 +34,7 @@
           :key="index"
           :search="condition.title"
           :article="item"
+          @click.native="_preveousTags(item.tags)"
         />
       </div>
       <div v-if="isDone" class="isDone">
@@ -78,20 +79,16 @@
           推荐文章
         </p>
         <List>
-          <ListItem>
-            <ListItemMeta
-              avatar="https://dev-file.iviewui.com/userinfoPDvn9gKWYihR24SpgC319vXY8qniCqj4/avatar"
-              title="This is title"
-              description="This is description, this is description."
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemMeta
-              avatar="https://dev-file.iviewui.com/userinfoPDvn9gKWYihR24SpgC319vXY8qniCqj4/avatar"
-              title="This is title"
-              description="This is description, this is description."
-            />
-          </ListItem>
+          <a
+            v-for="(item, index) in recomment"
+            target="_blank"
+            :href="item.article_info.link_url"
+            :key="item._id"
+          >
+            <ListItem>
+              <ListItemMeta :title="item.article_info.title" />
+            </ListItem>
+          </a>
         </List>
       </Card>
     </div>
@@ -100,7 +97,7 @@
 </template>
 <script>
 import throttle from 'lodash.throttle'
-import { getArticle } from '@/api'
+import { getArticle, getRecomment } from '@/api'
 import articlecom from '@/components/article'
 import selectupdown from '@/components/selectupdown'
 import ModalPost from '@/components/ModalPost'
@@ -135,7 +132,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('local', ['localTags'])
+    ...mapState('local', ['localTags', 'preveousTags'])
   },
   data() {
     return {
@@ -179,7 +176,8 @@ export default {
           sort: 'desc',
           selected: false
         }
-      ]
+      ],
+      recomment: []
     }
   },
   watch: {
@@ -196,10 +194,17 @@ export default {
         this.condition.title = v
       },
       immediate: true
+    },
+    preveousTags() {
+      this.getRecomment()
     }
   },
   methods: {
-    ...mapMutations('local', ['_localTagsAdd', '_localTagsRm']),
+    ...mapMutations('local', [
+      '_localTagsAdd',
+      '_localTagsRm',
+      '_preveousTags'
+    ]),
     goSort(item) {
       item.sort = item.sort === 'desc' ? 'asc' : 'desc'
       this.handleReachBottom(false)
@@ -230,6 +235,14 @@ export default {
       this.condition.sort = this.condition.sort === 'desc' ? 'asc' : 'desc'
       this.condition.type = ''
       this.handleReachBottom(false)
+    },
+    getRecomment() {
+      let data = { tags: this.preveousTags }
+      getRecomment(data).then((res) => {
+        if (res.success) {
+          this.recomment = res.data
+        }
+      })
     },
     handleReachBottom(add = true) {
       return new Promise((resolve) => {

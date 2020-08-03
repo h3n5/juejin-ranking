@@ -8,7 +8,8 @@ const state = () => ({
     { title: '面试' },
     { title: '算法' },
     { title: 'CSS' }
-  ]
+  ],
+  preveousTags: []
 })
 const getters = {
   localTagsFind: (state) => (title) => {
@@ -22,6 +23,9 @@ const getters = {
   }
 }
 const mutations = {
+  _preveousTags(state, val) {
+    state.preveousTags = val
+  },
   _localTagsAdd(state, val) {
     if (!state.localTags.find((v) => v.title === val.title)) {
       state.localTags.push(val)

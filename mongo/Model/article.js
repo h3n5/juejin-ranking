@@ -1,10 +1,10 @@
 const mongoose = require('../server')
 const Schema = mongoose.Schema
-const ObjectId = Schema.Types.ObjectId
-const Mixed = Schema.Types.Mixed
 const articleSchema = new Schema(
   {
-    article_id: String,
+    article_id: {
+      type: String
+    },
     article_info: {
       article_id: String,
       user_id: String,
@@ -67,20 +67,22 @@ const articleSchema = new Schema(
       mtime: Number,
       show_type: Number
     },
-    tags: [
-      {
-        id: Number,
-        tag_id: String,
-        tag_name: String,
-        color: String,
-        icon: String,
-        back_ground: String,
-        show_navi: Number,
-        tag_alias: String,
-        post_article_count: Number,
-        concern_user_count: Number
-      }
-    ],
+    tags: {
+      type: [
+        {
+          id: Number,
+          tag_id: { type: String, index: true },
+          tag_name: { type: String, index: false },
+          color: String,
+          icon: String,
+          back_ground: String,
+          show_navi: Number,
+          tag_alias: String,
+          post_article_count: Number,
+          concern_user_count: Number
+        }
+      ]
+    },
     user_interact: {
       id: Number,
       omitempty: Number,
@@ -94,5 +96,4 @@ const articleSchema = new Schema(
     collection: 'Articles'
   }
 )
-
 module.exports = mongoose.model('Articles', articleSchema)

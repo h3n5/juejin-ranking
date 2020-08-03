@@ -27,3 +27,10 @@ export const getRefresh = (params) => {
     params: params
   })
 }
+export const getRecomment = (params) => {
+  return axios.request({
+    url: '/getRecomment',
+    method: 'post',
+    data: params
+  })
+}

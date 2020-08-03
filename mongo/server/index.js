@@ -20,4 +20,6 @@ mongoose.connection.on('disconnected', function() {
 })
 
 mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true)
+mongoose.set('debug', true)
 module.exports = mongoose
