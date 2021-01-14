@@ -54,7 +54,7 @@ const articleSchema = new Schema(
       got_view_count: Number,
       post_shortmsg_count: Number,
       digg_shortmsg_count: Number,
-      isfollowed: false,
+      isfollowed: Boolean,
       favorable_author: Number,
       power: Number
     },
@@ -71,8 +71,8 @@ const articleSchema = new Schema(
       type: [
         {
           id: Number,
-          tag_id: { type: String, index: true },
-          tag_name: { type: String, index: false },
+          tag_id: String,
+          tag_name: String,
           color: String,
           icon: String,
           back_ground: String,

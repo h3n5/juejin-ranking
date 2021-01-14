@@ -28,6 +28,10 @@ request.interceptors.response.use(
   },
   function(error) {
     // 对响应错误做点什么
+    if (error.code === 'ETIMEDOUT' && !error.config._reTry) {
+      error.config._reTry = true
+      return request(error.config)
+    }
     return Promise.reject(error)
   }
 )

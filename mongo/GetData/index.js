@@ -1,8 +1,10 @@
-const tag = require('./package/tag')
-const article = require('./package/article')
+const getTags = require('./package/tag')
+const getArticles = require('./package/article')
 
 async function task() {
-  let res = await tag()
-  await article(res)
+  console.time('任务耗时')
+  let tags = await getTags()
+  await getArticles(tags)
+  console.timeEnd('任务耗时')
 }
 module.exports = task

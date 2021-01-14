@@ -6,7 +6,7 @@
       "request": "launch",
       "name": "My Nuxt project",
       "protocol": "inspector",
-      "program": "${workspaceRoot}/server/index.js",
+      "program": "${workspaceRoot}/mongo/GetData/index.js",
       "stopOnEntry": true,
       "args": ["dev"],
       "cwd": "${workspaceRoot}",

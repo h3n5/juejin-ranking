@@ -1,6 +1,7 @@
 const request = require('../axios')
-const tagListUrl = 'https://apinew.juejin.im/tag_api/v1/query_tag_list'
+const tagListUrl = 'https://api.juejin.cn/tag_api/v1/query_tag_list'
 const Tag = require('../../Model/tag')
+
 async function getTags() {
   try {
     let postData = { limit: 100000 }
@@ -13,11 +14,8 @@ async function getTags() {
         upsert: true
       }
     }))
-    Tag.bulkWrite(saveData)
-      .then(() => {
-        console.log('标签更新完成')
-      })
-      .catch((e) => console.log('err2', e))
+    await Tag.bulkWrite(saveData)
+    console.log('标签更新完成', saveData.length)
     return tags
   } catch (error) {
     console.log(error)
